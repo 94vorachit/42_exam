@@ -1,0 +1,3 @@
+The entire content of file is printed character by
+character till end of file. It reads newline character
+as well.

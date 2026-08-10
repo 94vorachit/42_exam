@@ -1,0 +1,323 @@
+/*
+ * EXERCISE: FT_SCANF
+ *
+ * DESCRIPTION:
+ * Implement a simplified version of scanf that handles only %s, %d and %c.
+ *
+ * KEY CONCEPTS:
+ * 1. VARIABLE ARGUMENTS: va_list, va_start, va_arg, va_end
+ * 2. FORMAT PARSING: Parse the format string character by character
+ * 3. FILE READING: fgetc(), ungetc() for flow control
+ * 4. CONVERSIONS: Convert strings to numbers, handle whitespace
+ *
+ * SUPPORTED FORMAT:
+ * - %s: string (up to the first whitespace)
+ * - %d: decimal integer (optional sign)
+ * - %c: single character
+ */
+
+#include <stdio.h>
+#include <stdarg.h>
+#include <ctype.h>
+
+// Function to skip whitespace in the stream
+int match_space(FILE *f)
+{
+    /*
+     * WHITESPACE HANDLING:
+     * - Read characters while they are whitespace
+     * - Push the first non-space character back to the stream
+     * - Return -1 on error
+     */
+    int ch = fgetc(f);
+    if (ch == EOF && ferror(f))
+        return -1;
+    
+    while (ch != EOF)
+    {
+        if (!isspace(ch))
+        {
+            ungetc(ch, f); // Return non-space character
+            break;
+        }
+        ch = fgetc(f);
+    }
+    
+    if (ferror(f))
+        return -1;
+    return 1;
+}
+
+// Function to match a specific character
+int match_char(FILE *f, char c)
+{
+    /*
+     * LITERAL CHARACTER MATCHING:
+     * - Read a character from the stream
+     * - Check if it matches the expected one
+     * - Push it back to the stream if it does not match
+     */
+    int ch = fgetc(f);
+    if (ch == c)
+        return 1;
+    if (ch != EOF)
+        ungetc(ch, f);
+    return -1;
+}
+
+// Function to read a character (%c)
+int scan_char(FILE *f, va_list ap)
+{
+    /*
+     * CONVERSION %c:
+     * - Read exactly one character
+     * - Do not skip whitespace
+     * - Store it into the provided pointer
+     */
+    int ch = fgetc(f);
+    char *cp = va_arg(ap, char *);
+
+    if (ch == EOF)
+        return -1;
+    
+    *cp = (char)ch;
+    return 1;
+}
+
+// Function to read an integer (%d)
+int scan_int(FILE *f, va_list ap)
+{
+    /*
+     * CONVERSION %d:
+     * - Skip initial whitespace
+     * - Read optional sign (+/-)
+     * - Read digits and build the number
+     * - Push the last non-digit character back to the stream
+     */
+    int sign = 1;
+    int value = 0;
+    int ch = fgetc(f);
+    int *ip = va_arg(ap, int *);
+    int count = 0;
+
+    if (ch == EOF)
+        return -1;
+    
+    // Saltar espacios en blanco
+    while (isspace(ch))
+        ch = fgetc(f);
+    
+    // Manejar signo
+    if (ch == '-')
+    {
+        sign = -1;
+        ch = fgetc(f);
+    }
+    else if (ch == '+')
+    {
+        ch = fgetc(f);
+    }
+    
+    // Verificar que el primer carácter sea un dígito
+    if (!isdigit(ch))
+    {
+        ungetc(ch, f);
+        return -1;
+    }
+    
+    // Leer dígitos y construir el número
+    while (isdigit(ch))
+    {
+        value = value * 10 + (ch - '0');
+        count++;
+        ch = fgetc(f);
+    }
+    
+    // Devolver último carácter no-dígito
+    if (ch != EOF)
+        ungetc(ch, f);
+
+    if (count == 0)
+        return -1;
+    
+    *ip = value * sign;
+    return 1;
+}
+
+// Function to read a string (%s)
+int scan_string(FILE *f, va_list ap)
+{
+    /*
+     * CONVERSION %s:
+     * - Skip initial whitespace
+     * - Read characters until whitespace is found
+     * - Terminate the string with '\0'
+     * - Push the trailing whitespace character back to the stream
+     */
+    int ch = fgetc(f);
+    char *sp = va_arg(ap, char *);
+    int i = 0;
+
+    // Saltar espacios en blanco iniciales
+    while (ch != EOF && isspace(ch))
+        ch = fgetc(f);
+    
+    if (ch == EOF)
+        return -1;
+
+    // Leer caracteres hasta espacio en blanco
+    do
+    {
+        sp[i] = ch;
+        i++;
+        ch = fgetc(f);
+    } while (ch != EOF && !isspace(ch));
+    
+    sp[i] = '\0'; // Terminar string
+
+    // Devolver carácter de espacio al stream
+    if (ch != EOF)
+        ungetc(ch, f);
+    
+    if (i == 0)
+        return -1;
+    return 1;
+}
+
+// Function to handle format conversions
+int match_conv(FILE *f, const char **format, va_list ap)
+{
+    /*
+     * CONVERSION DISPATCHER:
+     * - Inspect the conversion character
+     * - Call the appropriate handler function
+     * - Handle whitespace for %d and %s automatically
+     */
+    switch (**format)
+    {
+        case 'c':
+            return scan_char(f, ap);
+        case 'd':
+            match_space(f); // %d salta espacios automáticamente
+            return scan_int(f, ap);
+        case 's':
+            match_space(f); // %s salta espacios automáticamente
+            return scan_string(f, ap);
+        case '\0':
+            return -1;
+        default:
+            return -1; // Conversión no soportada
+    }
+}
+
+// Main scanf function
+int ft_vfscanf(FILE *f, const char *format, va_list ap)
+{
+    /*
+     * MAIN SCANF LOGIC:
+     * - Parse the format string character by character
+     * - Handle literal characters and conversions (%)
+     * - Count successful conversions
+     * - Stop on the first error
+     */
+    int nconv = 0; // Número de conversiones exitosas
+
+    // Verificar que hay datos disponibles
+    int c = fgetc(f);
+    if (c == EOF)
+        return EOF;
+    ungetc(c, f);
+
+    while (*format)
+    {
+        if (*format == '%')
+        {
+            // Conversión encontrada
+            format++;
+            if (match_conv(f, &format, ap) != 1)
+                break; // Error en conversión
+            else
+                nconv++; // Conversión exitosa
+        }
+        else if (isspace(*format))
+        {
+            // Espacio en blanco en formato: saltar espacios en input
+            if (match_space(f) == -1)
+                break;
+        }
+        else
+        {
+            // Carácter literal: debe coincidir exactamente
+            if (match_char(f, *format) != 1)
+                break;
+        }
+        format++;
+    }
+    
+    // Verificar errores de archivo
+    if (ferror(f))
+        return EOF;
+    
+    return nconv; // Retornar número de conversiones exitosas
+}
+
+// Wrapper function for standard scanf
+int ft_scanf(const char *format, ...)
+{
+    /*
+     * VARIABLE ARGUMENTS WRAPPER:
+     * - Initialize va_list
+     * - Call the main function with stdin
+     * - Clean up va_list
+     */
+    va_list ap;
+
+    va_start(ap, format);
+    int ret = ft_vfscanf(stdin, format, ap);
+    va_end(ap);
+    
+    return ret;
+}
+
+/*
+ * EJEMPLO DE USO:
+ * 
+ * int main(void)
+ * {
+ *     int x;
+ *     char str[100];
+ *     char c;
+ * 
+ *     // Leer: número, espacio, string, espacio, carácter
+ *     int converted = ft_scanf("%d %s %c", &x, str, &c);
+ *     
+ *     printf("Convertidos: %d\n", converted);
+ *     printf("Número: %d, String: %s, Carácter: %c\n", x, str, c);
+ *     
+ *     return 0;
+ * }
+ */
+
+/*
+ * PUNTOS CLAVE PARA EL EXAMEN:
+ * 
+ * 1. ARGUMENTOS VARIABLES:
+ *    - va_start(ap, last_param) para inicializar
+ *    - va_arg(ap, type) para obtener siguiente argumento
+ *    - va_end(ap) para limpiar
+ * 
+ * 2. CONTROL DE FLUJO DE ARCHIVO:
+ *    - fgetc() para leer carácter
+ *    - ungetc() para devolver carácter al stream
+ *    - ferror() para verificar errores
+ * 
+ * 3. MANEJO DE ESPACIOS:
+ *    - %c NO salta espacios en blanco
+ *    - %d y %s SÍ saltan espacios en blanco
+ *    - Espacios en formato coinciden con cualquier whitespace
+ * 
+ * 4. VALOR DE RETORNO:
+ *    - Número de conversiones exitosas
+ *    - EOF si error de archivo o EOF antes de conversiones
+ *    - Parar en primera conversión fallida
+ */
