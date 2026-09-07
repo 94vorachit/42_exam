@@ -6,9 +6,28 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/04 02:09:17 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/09/04 03:51:17 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/09/04 04:44:42 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+/*
+ * EXERCISE: POWERSET
+ *
+ * DESCRIPTION:
+ * Find all subsets of a set of integers whose sum is equal to a target.
+ *
+ * KEY CONCEPTS:
+ * 1. BACKTRACKING: Explore all possible combinations
+ * 2. SUBSET SUM: Classic subset-sum problem
+ * 3. BINARY DECISION: For each element, include it or not
+ * 4. ORDER PRESERVATION: Elements must keep their original order
+ *
+ * ALGORITHM:
+ * 1. For each element, make two decisions: include it or not
+ * 2. Keep the current sum and current subset
+ * 3. If sum == target, print the subset
+ * 4. Continue recursively with the remaining elements
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +58,7 @@ void	print_subset(int *subset, int size)
 	printf("\n");
 }
 
+// Recursive backtracking function
 void	backtrack(int *set, int *subset, int set_size, int subset_size, 
 					int index, int current_sum, int target, int *found)
 {
@@ -59,6 +79,7 @@ void	backtrack(int *set, int *subset, int set_size, int subset_size,
      * 2. DO include the current element (add it to the subset and update the sum)
 	 */
 
+	// Base case: we have processed all elements
 	if (index == set_size)
 	{
 		if (current_sum == target)
@@ -69,12 +90,27 @@ void	backtrack(int *set, int *subset, int set_size, int subset_size,
 		return; 
 	}
 	
+	/*
+	* DECISION 1: Do NOT include the current element
+	* - We do not modify subset or current_sum
+	* - We only advance to the next element
+	*/
 	backtrack(set, subset, set_size, subset_size, index + 1, current_sum, 
 				target, found);
+
+	/*
+	* DECISION 2: YES, include the current element
+	* - Add element to subset
+	* - Update sum
+	* - Increment subset size
+	*/
 	subset[subset_size] = set[index];
 	backtrack(set, subset, set_size, subset_size + 1, index + 1, 
 				current_sum + set[index], target, found);
+	// Note: We don't need to explicitly "undo" because
+	// subset[subset_size] will be overwritten on the next call
 }
+
 // Function to validate numeric arguments
 int	check_args(int ac, char **av)
 {
@@ -112,9 +148,14 @@ int	main(int ac, char **av)
 	 * - Invalid arguments: Return an error
 	 */
 	
+	if (ac < 2)
+		return (1);
 	// Special case: target = 0, print empty line and exit
-	if (ac == 1 || (ac >= 2 && av[1][0] == '0' && av[1][1] == '\0'))
-		return (printf("\n"));
+	if (ac >= 2 && av[1][0] == '0' && av[1][1] == '\0')
+	{
+		printf("\n");
+		return (0);
+	}
 	// else
 	// 	printf("target = 0, print empty line and exit : check\n");
 
@@ -173,9 +214,6 @@ int	main(int ac, char **av)
 	int	found = 0;
 
 	backtrack(set, subset, set_size, 0, 0, 0, target, &found);
-
-	if (!found)
-		printf("\n");
 	free(set);
 	free(subset);
 	return (0);
