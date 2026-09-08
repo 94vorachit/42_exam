@@ -6,11 +6,12 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:11:00 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/09/08 17:25:09 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/09/08 19:30:19 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
+#include <stdio.h>
 
 int	ft_strlen(char *s)
 {
@@ -50,6 +51,58 @@ int	ft_is_balanced(char *str, int len)
 }
 
 // Function to find the minimum number of removals needed
+void ft_find_min_removals(char *str, int *min_removals, int index, int current_removals)
+{
+    if (current_removals > *min_removals)
+        return;
+    if (ft_is_balanced(str, ft_strlen(str)))
+    {
+        if (current_removals < *min_removals)
+            *min_removals = current_removals;
+        return;
+    }
+    
+    int i = index;
+    while (str[i])
+    {
+        if (str[i] == '(' || str[i] == ')')
+        {
+            char saved = str[i];
+            str[i] = ' ';
+            
+            ft_find_min_removals(str, min_removals, i + 1, current_removals + 1);
+            
+            str[i] = saved;
+        }
+        i++;
+    }
+}
+
+void ft_generate_solutions(char *str, int min_removals, int index, int current_removals)
+{
+    if (current_removals > min_removals)
+        return;
+    if (ft_is_balanced(str, ft_strlen(str)) && current_removals == min_removals)
+    {
+        write(1, str, ft_strlen(str));
+        write(1, "\n", 1);
+        return;
+    }
+	
+	int	i = index;
+    while (str[i])
+    {
+        if (str[i] == '(' || str[i] == ')')
+        {
+            char saved = str[i];
+            str[i] = ' ';  
+            ft_generate_solutions(str, min_removals, i + 1, current_removals + 1);
+            str[i] = saved;
+		}
+        i++;
+    }
+}
+
 
 int	main(int ac, char **av)
 {
@@ -73,8 +126,11 @@ int	main(int ac, char **av)
 	}
 	
 	// Initialize with the maximum possible
-	int	min_remavals = ft_strlen(av[1]);
+	int	min_removals = ft_strlen(av[1]);
 	
+	ft_find_min_removals(av[1], &min_removals, 0, 0);
+    ft_generate_solutions(av[1], min_removals, 0, 0);
+    return 0;
 }
 
 /*
