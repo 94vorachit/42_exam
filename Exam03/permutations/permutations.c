@@ -20,7 +20,7 @@
 
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdio.h>
+// #include <stdio.h>
 
 // Helper function to calculate length
 int ft_strlen(char *s)
@@ -93,17 +93,17 @@ void generate_permutations(char *source, char *result, int pos)
 {
     /*
     * BACKTRACKING ALGORITHM FOR PERMUTATIONS:
-     * 
+    * 
     * BASE CASE: If pos == length, we have a complete permutation
     * - Print the current permutation
     * - Return to try other options
-     * 
+    * 
     * RECURSIVE CASE: For each character in source:
     * - If it is not used in result, try it
     * - Add it to result[pos]
     * - Recurse for the next position
     * - Remove the character (backtrack) to try others
-     */
+    */
     
     int source_len = ft_strlen(source);
     
@@ -202,28 +202,28 @@ int main(int argc, char **argv)
  * ALTERNATIVE VERSION USING HEAP'S ALGORITHM:
  * (More efficient for long strings)
  */
-void heap_permute(char *str, int size)
-{
-    // Base case
-    if (size == 1)
-    {
-        puts(str);
-        return;
-    }
+// void heap_permute(char *str, int size)
+// {
+//     // Base case
+//     if (size == 1)
+//     {
+//         puts(str);
+//         return;
+//     }
     
-    int i;
-    for (i = 0; i < size; i++)
-    {
-        heap_permute(str, size - 1);
+//     int i;
+//     for (i = 0; i < size; i++)
+//     {
+//         heap_permute(str, size - 1);
         
-        // If size is odd, swap the first and last
-        // If size is even, swap the i-th and last
-        if (size % 2 == 1)
-            ft_swap(&str[0], &str[size - 1]);
-        else
-            ft_swap(&str[i], &str[size - 1]);
-    }
-}
+//         // If size is odd, swap the first and last
+//         // If size is even, swap the i-th and last
+//         if (size % 2 == 1)
+//             ft_swap(&str[0], &str[size - 1]);
+//         else
+//             ft_swap(&str[i], &str[size - 1]);
+//     }
+// }
 
 /*
  * KEY POINTS FOR THE EXAM:
