@@ -6,7 +6,7 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/14 16:51:11 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/09/14 18:51:39 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/09/15 15:01:33 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,30 @@ int	ft_strchr(char *s, char c)
 	return (0);
 }
 
+void	ft_generate(char *src,char *res, int pos)
+{
+	int	src_len = ft_strlen(src);
+
+	if (pos == src_len)
+	{
+		write(1, res, src_len);
+		write(1, "\n", 1);
+		return;
+	}
+
+	int	i = 0;
+	while(i < src_len)
+	{
+		if (!ft_strchr(res, src[i]))
+		{
+			res[pos] = src[i];
+			ft_generate(src, res, pos + 1);
+			res[pos] = '\0';
+		}
+		i++;
+	}
+}
+
 int	main(int ac, char **av)
 {
 	if (ac != 2)
@@ -79,20 +103,21 @@ int	main(int ac, char **av)
 	int	i = 0;
 	while (av[1][i])
 	{
-		if (ft_isalpha(av[1][i]))
+		if (!ft_isalpha(av[1][i]))
 			return (0);
 		i++;
 	}
 	
+	printf("av[1] : %s\n", av[1]);
 	char *src = ft_order_string(av[1]);
-	printf("%s\n", src);
+	printf("Ordered : %s\n", src);
 	
 	int	len = ft_strlen(av[1]);
 	char *res = calloc(len + 1, 1);
 	if (!res)
 		return (1);
-	
+	printf("--------------------------\n");
+	ft_generate(src, res, 0);
+	free(res);
 	return (0);
 }
-
-
