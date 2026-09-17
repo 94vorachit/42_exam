@@ -21,9 +21,9 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
+// #include <stdlib.h>
+#include <math.h> //sqrtf
+#include <float.h> //FLT_MAX
 
 // Structure to represent a city
 typedef struct {
@@ -57,13 +57,13 @@ float calculate_total_distance(City *cities, int *path, int n)
     float total = 0.0f;
     int i;
     
-    // Distancias entre ciudades consecutivas
+    // Distances between consecutive cities
     for (i = 0; i < n - 1; i++)
     {
         total += calculate_distance(cities[path[i]], cities[path[i + 1]]);
     }
     
-    // Distancia de vuelta al inicio (cerrar el ciclo)
+    // Distance back to the start (closing the loop)
     total += calculate_distance(cities[path[n - 1]], cities[path[0]]);
     
     /*
@@ -128,11 +128,12 @@ void find_shortest_path(City *cities, int *path, int n, int pos, float *min_dist
         return;
     }
 
+    // Generate all permutations by swapping elements
     for (int i = pos; i < n; i++)
     {
-        swap(&path[pos], &path[i]);
-        find_shortest_path(cities, path, n, pos + 1, min_distance);
-        swap(&path[pos], &path[i]);
+        swap(&path[pos], &path[i]); // Swap
+        find_shortest_path(cities, path, n, pos + 1, min_distance); // Retake the course
+        swap(&path[pos], &path[i]); // Restore (backtrack)
     }
 }
 
@@ -148,10 +149,10 @@ int main(void)
      * 6. Print the result
      */
     
-    City cities[12];  // Máximo 11 ciudades + margen
+    City cities[12];  // Maximum 11 cities + margin
     int n = 0;
     
-    // Leer coordenadas desde stdin
+    // Read coordinates from stdin
     while (n < 11 && fscanf(stdin, "%f, %f", &cities[n].x, &cities[n].y) == 2)
     {
         n++;
@@ -164,7 +165,7 @@ int main(void)
         return 0;
     }
     
-    // Inicializar path: [0, 1, 2, ..., n-1]
+    // Initialize path: [0, 1, 2, ..., n-1]
     int path[12];
     for (int i = 0; i < n; i++)
     {
@@ -220,29 +221,29 @@ int main(void)
  */
 
 /*
- * COMPLEJIDAD Y OPTIMIZACIONES:
- * 
- * 1. COMPLEJIDAD TEMPORAL:
- *    - Fuerza bruta: O(n!)
- *    - Con optimización: O((n-1)!)
- *    - Para n=11: ~3.6 millones de permutaciones
- * 
- * 2. OPTIMIZACIONES ADICIONALES:
- *    - Programación dinámica con bitmasks: O(n²2ⁿ)
- *    - Algoritmo de Christofides: aproximación 1.5x óptimo
- *    - Heurísticas: nearest neighbor, 2-opt, etc.
- * 
- * 3. PODA TEMPRANA:
- *    - Si distancia parcial > min_actual, podar rama
- *    - Usar cota inferior (MST) para poda agresiva
- * 
- * 4. PRECISIÓN NUMÉRICA:
- *    - Usar float para eficiencia
- *    - Cuidar errores de redondeo en comparaciones
- */
+* COMPLEXITY AND OPTIMIZATIONS:
+*
+* 1. TIME COMPLEXITY:
+*    - Brute force: O(n!)
+*    - With optimization: O((n-1)!)
+*    - For n=11: ~3.6 million permutations
+*
+* 2. ADDITIONAL OPTIMIZATIONS:
+*    - Dynamic programming with bitmasks: O(n²2ⁿ)
+*    - Christofides algorithm: 1.5x optimal approximation
+*    - Heuristics: nearest neighbor, 2-opt, etc.
+*
+* 3. EARLY PRUNING:
+*    - If partial distance > current_min, prune branch
+*    - Use lower bound (MST) for aggressive pruning
+*
+* 4. NUMERICAL PRECISION:
+*    - Use float for efficiency
+*    - Watch out for rounding errors in comparisons
+*/
 
 /*
- * IMPLEMENTACIÓN ALTERNATIVA CON PODA:
+ * ALTERNATIVE IMPLEMENTATION WITH PRUNING:
  * 
  * void find_shortest_with_pruning(City *cities, int *path, int n, int pos, 
  *                                 float current_dist, float *min_dist)
@@ -276,28 +277,55 @@ int main(void)
  */
 
 /*
- * PUNTOS CLAVE PARA EL EXAMEN:
- * 
- * 1. LECTURA DE ENTRADA:
- *    - Formato: "x, y" por línea
- *    - Usar fscanf(stdin, "%f, %f", &x, &y)
- *    - Leer hasta EOF o máximo 11 ciudades
- * 
- * 2. DISTANCIA EUCLIDIANA:
- *    - Fórmula: sqrt((x2-x1)² + (y2-y1)²)
- *    - Usar sqrtf() para floats
- *    - Compilar con -lm
- * 
- * 3. CICLO HAMILTONIANO:
- *    - CRUCIAL: agregar distancia de vuelta al inicio
- *    - Sin esto, el problema sería "shortest path" no TSP
- * 
- * 4. OPTIMIZACIÓN DE PERMUTACIONES:
- *    - Fijar primera ciudad reduce factorial
- *    - Fundamental para que el algoritmo termine en tiempo razonable
- * 
- * 5. CASOS ESPECIALES:
- *    - 0 o 1 ciudades: distancia 0.00
- *    - 2 ciudades: 2 × distancia entre ellas
- *    - Entrada inválida: manejar graciosamente
- */
+* KEY POINTS FOR THE EXAM:
+*
+* 1. READING INPUT:
+*    - Format: "x, y" per line
+*    - Use fscanf(stdin, "%f, %f", &x, &y)
+*    - Read until EOF or a maximum of 11 cities
+*
+* 2. EUCLIDEAN DISTANCE:
+*    - Formula: sqrt((x2-x1)² + (y2-y1)²)
+*    - Use sqrtf() for floats
+*    - Compile with -lm
+*
+* 3. HAMILTONIAN CYCLE:
+*    - CRUCIAL: add the distance back to the start
+*    - Without this, the problem would be "shortest path," not TSP
+*
+* 4. PERMUTATION OPTIMIZATION:
+*    - Fixing the first city reduces the factorial complexity
+*    - Essential for the algorithm to finish in a reasonable time
+*
+* 5. SPECIAL CASES:
+*    - 0 or 1 cities: distance 0.00
+*    - 2 cities: 2 × distance between them
+*    - Invalid input: handle gracefully
+*/
+
+/*
+* จุดสำคัญสำหรับการสอบ:
+*
+* 1. การอ่านข้อมูลเข้า:
+* - รูปแบบ: "x, y" ต่อบรรทัด
+* - ใช้ fscanf(stdin, "%f, %f", &x, &y)
+* - อ่านจนถึง EOF หรือสูงสุด 11 เมือง
+*
+* 2. ระยะทางแบบยูคลิด:
+* - สูตร: sqrt((x2-x1)² + (y2-y1)²)
+* - ใช้ sqrtf() สำหรับเลขทศนิยม
+* - คอมไพล์ด้วย -lm
+*
+* 3. วงจรแฮมิลโทเนียน:
+* - สำคัญมาก: เพิ่มระยะทางกลับไปยังจุดเริ่มต้น
+* - หากไม่มีสิ่งนี้ ปัญหาจะเป็น "เส้นทางที่สั้นที่สุด" ไม่ใช่ TSP
+*
+* 4. การเพิ่มประสิทธิภาพด้วยการเรียงลำดับ:
+* - การกำหนดเมืองแรกให้คงที่ช่วยลดแฟกทอเรียล
+* - จำเป็นสำหรับ อัลกอริทึมเพื่อให้เสร็จสิ้นภายในเวลาที่เหมาะสม
+*
+* 5. กรณีพิเศษ:
+* - 0 หรือ 1 เมือง: ระยะทาง 0.00
+* - 2 เมือง: 2 เท่าของระยะทางระหว่างเมือง
+* - ข้อมูลไม่ถูกต้อง: จัดการอย่างเหมาะสม
+*/

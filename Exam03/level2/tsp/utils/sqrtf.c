@@ -6,7 +6,7 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/15 16:15:25 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/09/15 18:17:11 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/09/17 17:45:19 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,9 @@ int	main(int ac, char **av)
 
 	while (fscanf(stdin, "%f, %f", &cities[n].x, &cities[n].y) == 2)
 	{
-		printf("n = %d, %f, %f\n", n, cities[n].x, cities[n].y);
+		printf("n = %d, %.2f, %.2f\n", n, cities[n].x, cities[n].y);
 		n++;
 	}
-	printf("sqrtf : %.7f\n", cal_dis(cities[0], cities[1]));
+	printf("sqrtf : %.2f\n", cal_dis(cities[0], cities[1]));
 	return (0);
 }
