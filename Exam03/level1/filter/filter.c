@@ -6,7 +6,7 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/10 17:17:41 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/08/10 17:53:23 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/09/24 18:10:38 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@
 * 4. Write the result to stdout
 */
 
-#define _GNU_SOURCE // Para memmem()
+// #define _GNU_SOURCE // Para memmem()
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 42
+# define BUFFER_SIZE 1
 #endif
 
 #include <unistd.h>
@@ -102,13 +102,15 @@ int	main(int ac, char **av)
 	char	temp[BUFFER_SIZE];
 	char	*result = NULL;
 	char	*buffer;
-	int		total_read = 0;
-	ssize_t	bytes;
+	size_t	total_read = 0;
+	size_t	bytes;
 
 	// Read from stdin until EOF
+	// ssize_t read(int fd, void *buf, size_t count);
 	while ((bytes = read(0, temp, BUFFER_SIZE)) > 0)
 	{
 		// Expand the main buffer to accommodate the new data
+		// void *realloc(void *ptr, size_t size);
 		buffer = realloc(result, total_read + bytes + 1);
 		if (!buffer)
 		{
@@ -120,6 +122,7 @@ int	main(int ac, char **av)
 		result = buffer;
 
 		// Copy the new data to the main buffer
+		// void *memmove(void *dest, const void *src, size_t n);
 		memmove(result + total_read, temp, bytes);
 		total_read += bytes;
 		result[total_read] = '\0'; // Ensure completion
