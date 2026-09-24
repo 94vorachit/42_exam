@@ -6,6 +6,15 @@ VARIABLE ARGUMENTS WRAPPER:
 * Initialize va_list (#include <stdarg.h>)
 * Call the main function with stdin
 * Clean up va_list
+
+ADD
+```c
+va_list ap;
+....
+va_end(ap);
+```
+
+CODE
 ``` c
 int ft_scanf(const char *format, ...)
 {
