@@ -16,7 +16,7 @@ STEP BY STEP
 1. สร้าง int main(int ac, char **av) พร้อมดักเงื่อนไข
 	1. argc == 1 : Return an error
 		```c
-		if (ac < 2>)
+		if (ac < 2)
 			return (1);
 		```
 	2. Special case: target = 0, print empty line and exit
@@ -155,6 +155,10 @@ STEP BY STEP
 8. เรียกใช้ function backtrack และ free set และ subset
 	```c
 	ft_backtrack(set, subset, set_size, 0, 0, 0, target, &found);
+
+	if (!found)
+        printf("\n");
+		
 	free(set);
 	free(subset);
 	return (0);

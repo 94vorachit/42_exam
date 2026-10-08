@@ -6,7 +6,7 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/04 02:09:17 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/09/04 04:44:42 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/10/08 17:44:34 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void	backtrack(int *set, int *subset, int set_size, int subset_size,
 		if (current_sum == target)
 		{
 			print_subset(subset, subset_size);
-			*found = 1;
+			// *found = 1;
 		}
 		return; 
 	}
@@ -151,7 +151,7 @@ int	main(int ac, char **av)
 	if (ac < 2)
 		return (1);
 	// Special case: target = 0, print empty line and exit
-	if (ac >= 2 && av[1][0] == '0' && av[1][1] == '\0')
+	if (ac == 2 && av[1][0] == '0' && av[1][1] == '\0')
 	{
 		printf("\n");
 		return (0);
@@ -214,6 +214,10 @@ int	main(int ac, char **av)
 	int	found = 0;
 
 	backtrack(set, subset, set_size, 0, 0, 0, target, &found);
+	
+	// if (!found)
+    //     printf("\n");
+		
 	free(set);
 	free(subset);
 	return (0);
