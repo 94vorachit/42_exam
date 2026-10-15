@@ -1,95 +1,90 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rip2.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/10/16 02:48:10 by vorhansa          #+#    #+#             */
+/*   Updated: 2026/10/16 03:01:19 by vorhansa         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <unistd.h>
 
-static int	ft_strlen(char *s)
+int	ft_strlen(char *s)
 {
-	int	len;
-
-	len = 0;
-	while (s[len])
-		len++;
-	return (len);
-}
-
-static void	print_result(char *s)
-{
-	int	len;
-
-	len = ft_strlen(s);
-	write(1, s, len);
-	write(1, "\n", 1);
-}
-
-static int	min_removals_needed(char *s)
-{
-	int	balance;
-	int	removals;
-	int	i;
-
-	balance = 0;
-	removals = 0;
-	i = 0;
+	int	i = 0;
 	while (s[i])
+		i++;
+	return (i);
+}
+
+int	ft_is_balance(char *s, int len)
+{
+	int	bal = 0;
+	int	i = 0;
+	
+	while (i < len)
 	{
 		if (s[i] == '(')
-			balance++;
-		else if (balance > 0)
-			balance--;
-		else
-			removals++;
+			bal++;
+		else if (s[i] == ')')
+		{
+			bal--;
+			if (bal < 0)
+				return (0);
+		}
 		i++;
 	}
-	removals += balance;
-	return (removals);
+	return (bal == 0);
 }
 
-static void	backtrack(char *s, int index, int open, int removed, int target)
+void	ft_solve(char *s, int *min, int index, int current, int print)
 {
-	if (index == (int)ft_strlen(s))
+	if (current > *min)
+		return ;
+	if (ft_is_balance(s, ft_strlen(s)))
 	{
-		if (open == 0 && removed == target)
-			print_result(s);
+		if (!print && current < *min)
+			*min = current;
+		else if (print && current == *min)
+		{
+			write(1, s, ft_strlen(s));
+			write(1, "\n", 1);
+		}
 		return ;
 	}
-	if (s[index] == '(')
+	
+	int	i = index;
+	while (s[i])
 	{
-		backtrack(s, index + 1, open + 1, removed, target);
-		if (removed < target)
+		if (s[i] == '(' || s[i] == ')')
 		{
-			s[index] = ' ';
-			backtrack(s, index + 1, open, removed + 1, target);
-			s[index] = '(';
+			char saved = s[i];
+			s[i] = ' ';
+			ft_solve(s, min, i + 1, current + 1, print);
+			s[i] = saved;
 		}
-	}
-	else
-	{
-		if (open > 0)
-			backtrack(s, index + 1, open - 1, removed, target);
-		if (removed < target)
-		{
-			s[index] = ' ';
-			backtrack(s, index + 1, open, removed + 1, target);
-			s[index] = ')';
-		}
+		i++;
 	}
 }
 
-int	main(int argc, char **argv)
+int	main(int ac, char **av)
 {
-	char	*str;
-	int		target;
-	int		i;
-
-	if (argc != 2)
+	if (ac != 2)
 		return (1);
-	i = 0;
-	while (argv[1][i])
+		
+	int	i = 0;
+	while (av[1][i])
 	{
-		if (argv[1][i] != '(' && argv[1][i] != ')')
+		if (av[1][i] == '(' && av[1][i] == ')')
 			return (1);
 		i++;
 	}
-	str = argv[1];
-	target = min_removals_needed(str);
-	backtrack(str, 0, 0, 0, target);
+	
+	int	min = ft_strlen(av[1]);
+	ft_solve(av[1], &min, 0, 0, 0);
+	ft_solve(av[1], &min, 0, 0, 1);
 	return (0);
 }

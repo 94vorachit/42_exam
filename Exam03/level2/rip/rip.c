@@ -6,12 +6,12 @@
 /*   By: vorhansa <vorhansa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 14:11:00 by vorhansa          #+#    #+#             */
-/*   Updated: 2026/09/08 19:30:19 by vorhansa         ###   ########.fr       */
+/*   Updated: 2026/10/12 23:27:40 by vorhansa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
-#include <stdio.h>
+// #include <stdio.h>
 
 int	ft_strlen(char *s)
 {
